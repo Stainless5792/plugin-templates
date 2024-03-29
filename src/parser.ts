@@ -150,7 +150,7 @@ export class Parser {
 
         if (AUTO_INCREMENTED_PREFIX_VARIABLE_NAME in parsedSpecialVariables) {
             const prefix = parsedSpecialVariables[AUTO_INCREMENTED_PREFIX_VARIABLE_NAME];
-            const prefixRegexp = new RegExp(`^${prefix}([0-9]+): `);
+            const prefixRegexp = new RegExp(`^${prefix}([0-9]+)`);
 
             let maximum = 0;
             let pageNumber = 0;
@@ -188,7 +188,7 @@ export class Parser {
                 maximum_str = "0" + maximum_str;
               }
 
-            meta.title = `${prefix}${maximum_str}: ${meta.title}`;
+            meta.title = `${prefix}${maximum_str}${meta.title}`;
             // meta.title = `${prefix}-${maximum + 1}: ${meta.title}`;
         }
 
