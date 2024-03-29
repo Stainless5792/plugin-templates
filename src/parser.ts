@@ -26,6 +26,8 @@ const NOTE_TITLE_VARIABLE_NAME = "template_title";
 const NOTE_TAGS_VARIABLE_NAME = "template_tags";
 const NOTE_FOLDER_VARIABLE_NAME = "template_notebook";
 const AUTO_INCREMENTED_PREFIX_VARIABLE_NAME = "template_auto_incremented_prefix";
+const AUTO_INCREMENTED_ID_ZERO_PADDING_LENGTH = "template_auto_incremented_id_zero_padding_length";
+const AUTO_INCREMENTED_ID_START_FROM = "template_auto_incremented_id_start_from";
 
 export class Parser {
     private utils: DateAndTimeUtils;
@@ -35,7 +37,9 @@ export class Parser {
         NOTE_TITLE_VARIABLE_NAME,
         NOTE_TAGS_VARIABLE_NAME,
         NOTE_FOLDER_VARIABLE_NAME,
-        AUTO_INCREMENTED_PREFIX_VARIABLE_NAME
+        AUTO_INCREMENTED_PREFIX_VARIABLE_NAME,
+        AUTO_INCREMENTED_ID_ZERO_PADDING_LENGTH,
+        AUTO_INCREMENTED_ID_START_FROM
     ];
 
     constructor(dateAndTimeUtils: DateAndTimeUtils, dialogViewHandle: string, logger: Logger) {
@@ -146,11 +150,20 @@ export class Parser {
 
         if (AUTO_INCREMENTED_PREFIX_VARIABLE_NAME in parsedSpecialVariables) {
             const prefix = parsedSpecialVariables[AUTO_INCREMENTED_PREFIX_VARIABLE_NAME];
-            const prefixRegexp = new RegExp(`^${prefix}-([0-9]+): `);
+            const prefixRegexp = new RegExp(`^${prefix}([0-9]+): `);
 
             let maximum = 0;
             let pageNumber = 0;
             let response: { items: { id: string, title: string }[], has_more: boolean };
+            
+            let zreo_padding_len = 0;
+            if (AUTO_INCREMENTED_ID_ZERO_PADDING_LENGTH in parsedSpecialVariables) {
+                zreo_padding_len = parseInt(parsedSpecialVariables[AUTO_INCREMENTED_ID_ZERO_PADDING_LENGTH]);
+            }    
+            if (AUTO_INCREMENTED_ID_START_FROM in parsedSpecialVariables) {
+                maximum = parseInt(parsedSpecialVariables[AUTO_INCREMENTED_ID_START_FROM]);
+            }    
+
             do {
                 response = await joplin.data.get(["search"], {
                     query: `title:"^${prefix}"`,
@@ -169,7 +182,14 @@ export class Parser {
                 }
             } while (response && response.has_more);
 
-            meta.title = `${prefix}-${maximum + 1}: ${meta.title}`;
+            maximum = maximum + 1;
+            let maximum_str = maximum.toString();
+            while (maximum_str.length < zreo_padding_len) {
+                maximum_str = "0" + maximum_str;
+              }
+
+            meta.title = `${prefix}${maximum_str}: ${meta.title}`;
+            // meta.title = `${prefix}-${maximum + 1}: ${meta.title}`;
         }
 
         if (NOTE_TAGS_VARIABLE_NAME in parsedSpecialVariables) {
