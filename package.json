@@ -1,6 +1,6 @@
 {
-  "name": "joplin-plugin-templates",
-  "version": "2.4.0",
+  "name": "joplin-plugin-templates-mky",
+  "version": "2.4.110",
   "scripts": {
     "dist": "webpack --joplin-plugin-config buildMain && webpack --joplin-plugin-config buildExtraScripts && webpack --joplin-plugin-config createArchive",
     "prepare": "npm run dist",
